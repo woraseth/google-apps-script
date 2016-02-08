@@ -49,12 +49,26 @@ function convertToDownload(url) {
   //   https://cloudbox.ku.ac.th/public.php?service=files&t=7f618ac8474e6a7119ddab1c1e82aa44
   //   to
   //   https://cloudbox.ku.ac.th/public.php?service=files&t=7f618ac8474e6a7119ddab1c1e82aa44&download
+  // or
+  //   https://drive.google.com/file/d/0B5fYc4W5XmgZemFSb3p1M2p0MGc/view?usp=sharing
+  //   to
+  //   https://drive.google.com/uc?export=download&id=0B5fYc4W5XmgZemFSb3p1M2p0MGc
+
   if (url.slice(-4) == 'dl=0') {
+    // dropbox
     url = url.slice(0, -4) + 'dl=1';
   } else if (url.indexOf('//cloudbox.ku.ac.th') != -1) {
+    // cloudbox
     if (url.slice(-1 * '&download'.length) != '&download') {
   	  url += '&download';
     }
+  } else if (url.indexOf('//drive.google') != -1) {
+    // G drive
+    var url = 'https://drive.google.com/file/d/0B5fYc4W5XmgZemFSb3p1M2p0MGc/view?usp=sharing';
+    var s1 = url.lastIndexOf('/');
+    var s0 = url.substring(0, s1).lastIndexOf('/');
+    var id = url.substring(s0 + 1, s1);
+    url = 'https://drive.google.com/uc?export=download&id=' + id;
   }
   return url;
 }
