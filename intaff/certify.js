@@ -1,5 +1,5 @@
 // before running this script
-//   # create a folder 'certify' in Google Drive
+//   # create a folder 'หนังสือรับรอง' in Google Drive
 
 function onSubmit(e) {
   responses = getResponses(e);
@@ -9,7 +9,7 @@ function onSubmit(e) {
   var superEmail = responses[5];
   
   // save image to drive
-  saveUrlToDrive(url, 'certify', name);   
+  saveUrlToDrive(url, 'หนังสือรับรอง', name);   
   
   // mail superviser
   supUrl = 'https://docs.google.com/forms/d/1szyyOUzpxPcRrok1D4026vaV5K5iHI7TFF9p2iZ8-o8/viewform?entry.1142428611=supname&entry.1139297885=worker'
