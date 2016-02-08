@@ -3,10 +3,10 @@
 
 function onSubmit(e) {
   responses = getResponses(e);
-  var url = convertToDownload(responses[5]);
   var name = responses[0];
-  var superEmail = responses[4];
-  var superName = responses[3];
+  var url = convertToDownload(responses[2]);
+  var superName = responses[4];
+  var superEmail = responses[5];
   
   // save image to drive
   saveUrlToDrive(url, 'certify', name);   
