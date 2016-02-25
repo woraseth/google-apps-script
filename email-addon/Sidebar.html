@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+$(function() {
+  $('#notify').change(notifyChanged);
+  $('#save-pref').click(savePrefToServer);
+  google.script.run
+    .withSuccessHandler(onOpenPrefSuccess)
+    .withFailureHandler(showStatus)
+    .withUserObject($('#button-bar').get())
+    .openPref();  
+});
+    
+function onOpenPrefSuccess(pref) {
+  $('#notify').prop('checked', !pref.notify ? true : pref.notify === 'true');
+  notifyChanged();
+  $('#date').val(!pref.date ? '31-01-2016' :  pref.date);
+//  $('#time').val(!pref.time ? '0' :  pref.time);
+  $('#email_col').val(!pref.email_col ? 'A' :  pref.email_col);
+  $('#subject').val(!pref.subject ? 'แจ้งเตือนการอบรมวันพรุ่งนี้' : pref.subject);
+  $('#msg').val(!pref.msg ? 'แจ้งเตือนการอบรมวันพรุ่งนี้' : pref.msg);
+} 
+
+function getTestingPref() {
+  var pref = {};
+  pref.notify = true;
+  pref.date = '31-01-2016';
+//  pref.time = '0';
+  pref.email_col = 'D';
+  pref.subject = 'sub';
+  pref.msg = 'msg';
+  return pref;
+}
+    
+function savePrefToServer() {
+  this.disabled = true;
+  
+  var pref = {};
+    
+  pref.notify = $('#notify').is(':checked');
+  pref.date = $('#date').val();
+  pref.email_col = $('#email_col').val();
+  pref.subject = $('#subject').val();
+  pref.msg = $('#msg').val();
+    
+  // Save the settings on the server
+  google.script.run
+    .withSuccessHandler(function(msg, element) {
+      showStatus('Saved settings', $('#button-bar'));
+      element.disabled = false;
+    })
+    .withFailureHandler(function(msg, element) {
+      showStatus(msg, $('#button-bar'));
+      element.disabled = false;
+    })
+    .withUserObject(this)
+    .savePref(pref);
+}
+   
+function notifyChanged() {
+  if ($('#notify').is(':checked'))
+    $('#notify_options').show();
+  else
+    $('#notify_options').hide();
+}
+  
+function showStatus(msg, element) {
+  $('#submit-subject').val('hello');
+  var div = $('<div>').attr('id', 'status').attr('class','error').text(msg);
+  $(element).after(div);
+}
+</script>
+
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <!-- The CSS package above applies Google styling to buttons and other elements. -->
+
+    <style>
+    .branding-below {
+      bottom: 54px;
+      top: 0;
+    }
+    
+    .branding-text {
+      left: 7px;
+      position: relative;
+      top: 3px;
+    }
+    
+    .logo {
+      vertical-align: middle;
+    }
+    
+    .width-100 {
+      width: 100%;
+      box-sizing: border-box;
+      -webkit-box-sizing : border-box;‌
+      -moz-box-sizing : border-box;
+    }
+    
+    label {
+      font-weight: bold;
+    }
+    
+    #creator-options,
+    #respondent-options {
+      background-color: #eee;
+      border-color: #eee;
+      border-width: 5px;
+      border-style: solid;
+    }
+    
+    #creator-email,
+    #respondent-email,
+    #button-bar,
+    #submit-subject {
+      margin-bottom: 10px;
+    }
+    
+    #response-step {
+      display: inline;
+    }
+    
+    </style>
+  </head>
+  <body>
+    <div class="sidebar branding-below">
+      <form>
+        <div>
+          <input type="checkbox" checked="checked" id="notify">
+          <label for="notify">เปิดการแจ้งเตือน</label>
+        </div>
+        <div class="block form-group" id="notify_options">
+          <label for="date">วันที่ส่งเมลแจ้งเตือน (รูปแบบ dd-mm-yyyy เช่น 31-01-2016)</label>
+          <input type="text" class="width-100" id="date" >
+<!--
+          <label for="date">เวลากี่นาฬิกา (รูปแบบ 24 ชม)</label>
+          <input type="text" class="width-100" id="time" >
+-->
+          <label for="email_col">คอลัมน์อีเมล</label>
+          <input type="text" class="width-100" id="email_col" >
+          
+          <label for="subject">Subject:</label>
+          <input type="text" class="width-100" id="subject">
+          
+          <label for="msg">ข้อความ:</label>
+          <textarea rows="8" cols="40" class="width-100" id="msg"></textarea>
+        </div>
+        <div class="block" id="button-bar">
+          <button class="action" id="save-pref">Save</button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="sidebar bottom">
+      <span class="gray branding-text">วรเศรษฐ สุวรรณิก<br />สำนักบริการคอมพิวเตอร์</span>
+    </div>
+    
+
+  </body>
+</html>
