@@ -1,19 +1,22 @@
 var ADDON_TITLE = 'ดาวน์โหลดไฟล์ไปเก็บที่ Google Drive';
-
+ 
 function TT() {
   var response = UrlFetchApp.fetch('http://upload.wikimedia.org/wikipedia/commons/6/6e/FractalLandscape.jpg');
   var blob = response.getBlob();
   Logger.log(blob.getContentType());
   var file = DriveApp.createFile(response);
 }
+
 function tt() {
   Logger.log(PropertiesService.getDocumentProperties().getProperties());
 }
+
 function onOpen(e) {
   FormApp.getUi()
       .createAddonMenu()
       .addItem('ตั้งค่า', 'showSidebar')
       .addToUi();
+  
 }
 
 function onInstall(e) {
@@ -92,8 +95,20 @@ function onVacUpdateAddOnFormSubmitEvent(e) {
   var urlItem = e.source.getItemById(parseInt(pref.url));
   var url = convertToDownload(e.response.getResponseForItem(urlItem).getResponse());
   var filename = e.response.getRespondentEmail();
-  saveUrlToDrive(url, pref.folder, filename);    
+  saveUrlToDrive(url, pref.folder, filename);  
+
+  addAds();
   
+}
+
+function addAds() {
+  var form = FormApp.getActiveForm();
+  var items = form.getItems();
+  if (items[items.length - 1].getType() != FormApp.ItemType.SECTION_HEADER) {
+    var item = form.addSectionHeaderItem();
+    item.setTitle('ข้อมูลปลอดภัยใน Cloud Box');
+    item.setHelpText('http://cloudbox.ku.ac.th (ฟรีพื้นที่ 10GB สำหรับชาวเกษตร)');
+  }
 }
 
 function saveUrlToDrive(url, foldername, filename) {
@@ -101,7 +116,6 @@ function saveUrlToDrive(url, foldername, filename) {
   var blob = response.getBlob();
   Logger.log(blob.getContentType());
   var file = DriveApp.createFile(blob);
-  //var file = DriveApp.createFile(response);
   file.setName(filename + '.' + blob.getContentType().split('/')[1]);
   
   var folderIt = DriveApp.getFoldersByName(foldername);
@@ -119,10 +133,19 @@ function convertToDownload(url) {
   //   https://drive.google.com/file/d/0B5fYc4W5XmgZemFSb3p1M2p0MGc/view?usp=sharing
   //   to
   //   https://drive.google.com/uc?export=download&id=0B5fYc4W5XmgZemFSb3p1M2p0MGc
+  // or
+  //   https://cloudbox.ku.ac.th/public.php?service=files&t=7f618ac8474e6a7119ddab1c1e82aa44
+  //   to
+  //   https://cloudbox.ku.ac.th/public.php?service=files&t=7f618ac8474e6a7119ddab1c1e82aa44&download
 
   if (url.slice(-4) == 'dl=0') {
     // dropbox
     url = url.slice(0, -4) + 'dl=1';
+  } else if (url.indexOf('//cloudbox.ku.ac.th') != -1) {
+    // cloudbox
+    if (url.slice(-1 * '&download'.length) != '&download') {
+  	  url += '&download';
+    }
   } else if (url.indexOf('//drive.google') != -1) {
     // G drive
     var url = 'https://drive.google.com/file/d/0B5fYc4W5XmgZemFSb3p1M2p0MGc/view?usp=sharing';
@@ -134,15 +157,6 @@ function convertToDownload(url) {
   return url;
 }
 
-  // or
-  //   https://cloudbox.ku.ac.th/public.php?service=files&t=7f618ac8474e6a7119ddab1c1e82aa44
-  //   to
-  //   https://cloudbox.ku.ac.th/public.php?service=files&t=7f618ac8474e6a7119ddab1c1e82aa44&download
 
 
-  //} else if (url.indexOf('//cloudbox.ku.ac.th') != -1) {
-    // cloudbox
-    //if (url.slice(-1 * '&download'.length) != '&download') {
-  	//  url += '&download';
-    //}
 
