@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+$(function() {
+  $('#enable_r').change(enableChanged);
+  $('#enable_c').change(enableChanged);
+  $('#enable_o').change(enableChanged);
+  enableChanged();
+  
+  $('#save').click(savePrefToServer);
+  google.script.run
+    .withSuccessHandler(onOpenPrefSuccess)
+    .withFailureHandler(showStatus)
+    .withUserObject($('#button-bar').get())
+    .openPref();  
+});
+
+function onOpenPrefSuccess(pref) {
+  $('#enable_r').prop('checked', !pref.enable_r ? true : pref.enable_r === 'true');
+  $('#subject_r').val(!pref.subject_r ? '' :  pref.subject_r);
+  $('#msg_r').val(!pref.msg_r ? '' :  pref.msg_r);
+  enableChanged();
+} 
+
+function savePrefToServer() {
+  this.disabled = true;
+  
+  var pref = {};
+    
+  pref.enable_r = $('#enable_r').is(':checked');
+  pref.subject_r = $('#subject_r').val();
+  pref.msg_r = $('#msg_r').val();
+    
+  // Save the settings on the server
+  google.script.run
+    .withSuccessHandler(function(msg, element) {
+      showStatus('Saved settings', $('#button-bar'));
+      element.disabled = false;
+    })
+    .withFailureHandler(function(msg, element) {
+      showStatus(msg, $('#button-bar'));
+      element.disabled = false;
+    })
+    .withUserObject(this)
+    .savePref(pref);
+}
+   
+function enableChanged() {
+  if ($('#enable_r').is(':checked'))
+    $('#options_r').show();
+  else
+    $('#options_r').hide();
+    
+  if ($('#enable_c').is(':checked'))
+    $('#options_c').show();
+  else
+    $('#options_c').hide();
+    
+  if ($('#enable_o').is(':checked'))
+    $('#options_o').show();
+  else
+    $('#options_o').hide();
+
+}
+  
+function showStatus(msg, element) {
+  $('#submit-subject').val('hello');
+  var div = $('<div>').attr('id', 'status').attr('class','error').text(msg);
+  $(element).after(div);
+}
+</script>
+
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <!-- The CSS package above applies Google styling to buttons and other elements. -->
+
+    <style>
+    .branding-below {
+      bottom: 54px;
+      top: 0;
+    }
+    
+    .branding-text {
+      left: 7px;
+      position: relative;
+      top: 3px;
+    }
+    
+    .logo {
+      vertical-align: middle;
+    }
+    
+    .width-100 {
+      width: 100%;
+      box-sizing: border-box;
+      -webkit-box-sizing : border-box;‌
+      -moz-box-sizing : border-box;
+    }
+    
+    label {
+      font-weight: bold;
+    }
+    
+    #creator-options,
+    #respondent-options {
+      background-color: #eee;
+      border-color: #eee;
+      border-width: 5px;
+      border-style: solid;
+    }
+    
+    #creator-email,
+    #respondent-email,
+    #button-bar,
+    #submit-subject {
+      margin-bottom: 10px;
+    }
+    
+    #response-step {
+      display: inline;
+    }
+    
+    </style>
+  </head>
+  <body>
+    <div class="sidebar branding-below">
+      <form>
+        <div>
+          <input type="checkbox" id="enable_r">
+          <label for="enable_r">ส่งเมลหาผู้กรอกแบบฟอร์ม (respondent)</label>
+        </div>
+        <div class="block form-group" id="options_r">
+          <label for="subject_r">หัวข้อ</label>
+          <input class="width-100" id="subject_r" />
+
+          <label for="msg_r">ข้อความ</label>
+          <textarea type="text" class="width-100" rows="5" cols="40" id="msg_r" ></textarea>
+        </div>
+
+        <div>
+          <input type="checkbox" id="enable_c">
+          <label for="enable_c">ส่งเมลหาผู้สร้างแบบฟอร์ม (you)</label>
+        </div>
+        <div class="block form-group" id="options_c">
+          <label for="subject_c">หัวข้อ</label>
+          <input class="width-100" id="subject_c" />
+
+          <label for="msg_c">ข้อความ</label>
+          <textarea type="text" class="width-100" rows="5" cols="40" id="msg_c" ></textarea>
+        </div>
+
+        <div>
+          <input type="checkbox" id="enable_o">
+          <label for="enable_o">ส่งเมลหาคนอื่น (other)</label>
+        </div>
+        <div class="block form-group" id="options_o">
+          <label for="address_o">อีเมลแอดเดรส</label>
+          <input class="width-100" id="address_o" />
+
+          <label for="subject_o">หัวข้อ</label>
+          <input class="width-100" id="subject_o" />
+
+          <label for="msg_o">ข้อความ</label>
+          <textarea type="text" class="width-100" rows="5" cols="40" id="msg_o" ></textarea>
+        </div>
+
+        <div class="block" id="button-bar">
+          <button class="action" id="save">Save</button>
+        </div>
+      </form>
+    </div>
+    <div class="sidebar bottom">
+    </div>
+  </body>
+</html>
