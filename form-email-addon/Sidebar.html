@@ -21,6 +21,16 @@ function onOpenPrefSuccess(pref) {
   $('#enable_r').prop('checked', !pref.enable_r ? true : pref.enable_r === 'true');
   $('#subject_r').val(!pref.subject_r ? '' :  pref.subject_r);
   $('#msg_r').val(!pref.msg_r ? '' :  pref.msg_r);
+
+  $('#enable_c').prop('checked', !pref.enable_c ? true : pref.enable_c === 'true');
+  $('#subject_c').val(!pref.subject_c ? '' :  pref.subject_c);
+  $('#msg_c').val(!pref.msg_c ? '' :  pref.msg_c);
+
+  $('#enable_o').prop('checked', !pref.enable_o ? true : pref.enable_o === 'true');
+  $('#email_o').val(!pref.email_o ? '' :  pref.email_o);
+  $('#subject_o').val(!pref.subject_o ? '' :  pref.subject_o);
+  $('#msg_o').val(!pref.msg_o ? '' :  pref.msg_o);
+
   enableChanged();
 } 
 
@@ -33,6 +43,15 @@ function savePrefToServer() {
   pref.subject_r = $('#subject_r').val();
   pref.msg_r = $('#msg_r').val();
     
+  pref.enable_c = $('#enable_c').is(':checked');
+  pref.subject_c = $('#subject_c').val();
+  pref.msg_c = $('#msg_c').val();
+
+  pref.enable_o = $('#enable_o').is(':checked');
+  pref.email_o = $('#email_o').val();
+  pref.subject_o = $('#subject_o').val();
+  pref.msg_o = $('#msg_o').val();
+
   // Save the settings on the server
   google.script.run
     .withSuccessHandler(function(msg, element) {
@@ -156,8 +175,8 @@ function showStatus(msg, element) {
           <label for="enable_o">ส่งเมลหาคนอื่น (other)</label>
         </div>
         <div class="block form-group" id="options_o">
-          <label for="address_o">อีเมลแอดเดรส</label>
-          <input class="width-100" id="address_o" />
+          <label for="email_o">อีเมลแอดเดรส</label>
+          <input class="width-100" id="email_o" />
 
           <label for="subject_o">หัวข้อ</label>
           <input class="width-100" id="subject_o" />
@@ -172,6 +191,7 @@ function showStatus(msg, element) {
       </form>
     </div>
     <div class="sidebar bottom">
+      แอดออนนี้จะเพิ่มโฆษณาบริการ CloudBox http://cloudbox.ku.ac.th ลงในฟอร์มหลังจากที่มีการ submit
     </div>
   </body>
 </html>
