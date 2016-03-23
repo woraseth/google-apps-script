@@ -35,17 +35,11 @@ function adjustFormSubmitTrigger() {
   var triggers = ScriptApp.getUserTriggers(form);
   var pref = PropertiesService.getDocumentProperties().getProperties();
 
-  respondantTrigger(form, triggers, pref);
-  creatorTrigger(form, triggers, pref);
-  otherTrigger(form, triggers, pref);
-}
-
-function respondantTrigger(form, triggers, pref) {
-  var triggerNeeded = pref.enable_r === 'true';
+  var triggerNeeded = pref.enable_r === 'true' || pref.enable_c === 'true' || pref.enable_o === 'true';
 
   // delete all existing triggers
   for (var i = triggers.length - 1; i >= 0; i--) {
-    if (triggers[i].getHandlerFunction() == 'onVacEmailRespondantAddOnFormSubmitEvent') {
+    if (triggers[i].getHandlerFunction() == 'onVacEmailAddOnFormSubmitEvent') {
       var existingTrigger = triggers[i];
       ScriptApp.deleteTrigger(existingTrigger);
     }
@@ -53,81 +47,34 @@ function respondantTrigger(form, triggers, pref) {
   
   if (triggerNeeded) {
     // add a new trigger if needed
-    var trigger = ScriptApp.newTrigger('onVacEmailRespondantAddOnFormSubmitEvent')
+    var trigger = ScriptApp.newTrigger('onVacEmailAddOnFormSubmitEvent')
         .forForm(form)
         .onFormSubmit()
         .create();
   }
 }
 
-function onVacEmailRespondantAddOnFormSubmitEvent(e) {
+function onVacEmailAddOnFormSubmitEvent(e) {
   var pref = PropertiesService.getDocumentProperties().getProperties();
-  try {
-    MailApp.sendEmail(e.response.getRespondentEmail(), pref.subject_r, applyTemplate(pref.msg_r, getResponses(e)));
-  } catch (ex) {}
-  addAds();
+  if (pref.enable_r === 'true') {
+    try {
+      MailApp.sendEmail(e.response.getRespondentEmail(), pref.subject_r, applyTemplate(pref.msg_r, getResponses(e)));
+    } catch (ex) {}
+  }
+  if (pref.enable_c === 'true') {
+    try {
+      MailApp.sendEmail(e.source.getEditors()[0].getEmail(), pref.subject_c, applyTemplate(pref.msg_c, getResponses(e)));
+    } catch (ex) {}
+  }
+  if (pref.enable_o === 'true') {
+    var resp = getResponses(e);
+    try {
+      MailApp.sendEmail(applyTemplate(pref.email_o, resp), pref.subject_o, applyTemplate(pref.msg_o, resp));
+    } catch (ex) {}
+  }
 }
 
 //--------------------------------------------------------------------------------------------
-function creatorTrigger(form, triggers, pref) {
-  var triggerNeeded = pref.enable_c === 'true';
-
-  // delete all existing triggers
-  for (var i = triggers.length - 1; i >= 0; i--) {
-    if (triggers[i].getHandlerFunction() == 'onVacEmailCreatorAddOnFormSubmitEvent') {
-      var existingTrigger = triggers[i];
-      ScriptApp.deleteTrigger(existingTrigger);
-    }
-  }
-  
-  if (triggerNeeded) {
-    // add a new trigger if needed
-    var trigger = ScriptApp.newTrigger('onVacEmailCreatorAddOnFormSubmitEvent')
-        .forForm(form)
-        .onFormSubmit()
-        .create();
-  }
-}
-
-function onVacEmailCreatorAddOnFormSubmitEvent(e) {
-  var pref = PropertiesService.getDocumentProperties().getProperties();
-  try {
-    MailApp.sendEmail(e.source.getEditors()[0].getEmail(), pref.subject_c, applyTemplate(pref.msg_c, getResponses(e)));
-  } catch (ex) {}
-  addAds();
-}
-//--------------------------------------------------------------------------------------------
-function otherTrigger(form, triggers, pref) {
-  var triggerNeeded = pref.enable_o === 'true';
-
-  // delete all existing triggers
-  for (var i = triggers.length - 1; i >= 0; i--) {
-    if (triggers[i].getHandlerFunction() == 'onVacEmailOtherAddOnFormSubmitEvent') {
-      var existingTrigger = triggers[i];
-      ScriptApp.deleteTrigger(existingTrigger);
-    }
-  }
-  
-  if (triggerNeeded) {
-    // add a new trigger if needed
-    var trigger = ScriptApp.newTrigger('onVacEmailOtherAddOnFormSubmitEvent')
-        .forForm(form)
-        .onFormSubmit()
-        .create();
-  }
-}
-
-function onVacEmailOtherAddOnFormSubmitEvent(e) {
-  var pref = PropertiesService.getDocumentProperties().getProperties();
-  var resp = getResponses(e);
-  try {
-    MailApp.sendEmail(applyTemplate(pref.email_o, resp), pref.subject_o, applyTemplate(pref.msg_o, resp));
-  } catch (ex) {}
-  addAds();
-}
-//--------------------------------------------------------------------------------------------
-
-
 // get reponses from event object of form submit
 function getResponses(e) {
   var resp = e.response.getItemResponses();
@@ -142,11 +89,14 @@ function applyTemplate(msg, resp) {
     var key = '{' + (i+1) + '}';
     msg = msg.split(key).join(resp[i]);
   }
+  for (var i = 0; i < resp.length; i++) {
+    var key = '{url(' + (i+1) + ')}';
+    msg = msg.split(key).join(encodeURI(resp[i]));
+  }
   return msg;
 }
 
 //--------------------------------------------------------------------------------------------
-
 
 function addAds() {
   var form = FormApp.getActiveForm();
