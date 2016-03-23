@@ -77,10 +77,19 @@ function onVacEmailAddOnFormSubmitEvent(e) {
 //--------------------------------------------------------------------------------------------
 // get reponses from event object of form submit
 function getResponses(e) {
+  /*
   var resp = e.response.getItemResponses();
   var responses = []
   for (i = 0; i < resp.length; i++)
      responses.push(resp[i].getResponse());
+  */
+  var form = e.source;
+  var items = form.getItems();
+  var responses = [];
+  for (i = 0; i < items.length; i++) {
+    var r = e.response.getResponseForItem(items[i]);
+    responses.push(r == null ? '' : r.getResponse());
+  }
   return responses;
 }
 
