@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+$(function() {
+  $('#save-pref').click(savePrefToServer);
+  google.script.run
+    .withSuccessHandler(onOpenPrefSuccess)
+    .withFailureHandler(showStatus)
+    .withUserObject($('#button-bar').get())
+    .openPref();  
+});
+    
+function onOpenPrefSuccess(pref) {
+  $('#enable').prop('checked', !pref.enable ? false : pref.enable === 'true');
+} 
+
+//function getTestingPref() {
+//  var pref = {};
+//  pref.notify = true;
+//  pref.date = '31-01-2016';
+////  pref.time = '0';
+//  pref.email_col = 'D';
+//  pref.subject = 'sub';
+//  pref.msg = 'msg';
+//  return pref;
+//}
+    
+function savePrefToServer() {
+  this.disabled = true;
+  
+  var pref = {};
+    
+  pref.enable = $('#enable').is(':checked');
+   
+  // Save the settings on the server
+  google.script.run
+    .withSuccessHandler(function(msg, element) {
+      showStatus('Saved settings', $('#button-bar'));
+      element.disabled = false;
+    })
+    .withFailureHandler(function(msg, element) {
+      showStatus(msg, $('#button-bar'));
+      element.disabled = false;
+    })
+    .withUserObject(this)
+    .savePref(pref);
+}
+  
+function showStatus(msg, element) {
+  $('#submit-subject').val('hello');
+  var div = $('<div>').attr('id', 'status').attr('class','error').text(msg);
+  $(element).after(div);
+}
+</script>
+
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <!-- The CSS package above applies Google styling to buttons and other elements. -->
+
+    <style>
+    .branding-below {
+      bottom: 54px;
+      top: 0;
+    }
+    
+    .branding-text {
+      left: 7px;
+      position: relative;
+      top: 3px;
+    }
+    
+    .logo {
+      vertical-align: middle;
+    }
+    
+    .width-100 {
+      width: 100%;
+      box-sizing: border-box;
+      -webkit-box-sizing : border-box;‌
+      -moz-box-sizing : border-box;
+    }
+    
+    label {
+      font-weight: bold;
+    }
+    
+    #creator-options,
+    #respondent-options {
+      background-color: #eee;
+      border-color: #eee;
+      border-width: 5px;
+      border-style: solid;
+    }
+    
+    #creator-email,
+    #respondent-email,
+    #button-bar,
+    #submit-subject {
+      margin-bottom: 10px;
+    }
+    
+    #response-step {
+      display: inline;
+    }
+    
+    </style>
+  </head>
+  <body>
+    <div class="sidebar branding-below">
+      <form>
+        <div>
+          <input type="checkbox" checked="checked" id="enable">
+          <label for="notify">เปิดการใช้งาน</label>
+        </div>
+        <div class="block" id="button-bar">
+          <button class="action" id="save-pref">Save</button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="sidebar bottom">
+      <span class="gray branding-text">วรเศรษฐ สุวรรณิก<br />สำนักบริการคอมพิวเตอร์</span>
+    </div>
+
+  </body>
+</html>
