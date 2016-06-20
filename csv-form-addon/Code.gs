@@ -59,18 +59,27 @@ function adjustFormSubmitTrigger() {
 }
 
 function onVacCsvFieldAddOnFormSubmitEvent(e) {
-  var csv = findParagraph(e);
-  if (csv == null)
-    return;
-  
-  var form = e.source;
+  var items = e.source.getItems();
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].getType() == FormApp.ItemType.PARAGRAPH_TEXT) {
+      try {
+        processCsvParagraph(e, items[i]);
+      } catch (err) {
+      }
+    }
+  }
+}
+
+function processCsvParagraph(e, item) {
+  var csv = e.response.getResponseForItem(item).getResponse();
   // find destination spreadsheet
-  var ss = SpreadsheetApp.openById(getDestId(form));
+  var ss = SpreadsheetApp.openById(getDestId(e.source));
   // add csvField page if not exist
-  var csvSheet = ss.getSheetByName('csvField');
+  var sheetName = item.getTitle();
+  var csvSheet = ss.getSheetByName(sheetName);
   if (csvSheet == null) {
-    ss.insertSheet('csvField')
-    csvSheet = ss.getSheetByName('csvField');
+    ss.insertSheet(sheetName)
+    csvSheet = ss.getSheetByName(sheetName);
   }
   // append CSV data 
   addCSV(csvSheet, e.response.getTimestamp(), csv)  
@@ -88,20 +97,10 @@ function getDestId(form) {
 
 function addCSV(sheet, pk, csv) {
   var lines = csv.split('\n');
-  for (i = 0; i < lines.length; i++) {
+  for (var i = 0; i < lines.length; i++) {
     var row = lines[i].split(',').map(function (x) {return x.trim()});
     row.unshift(pk)
     sheet.appendRow(row);
   }
 }
 
-function findParagraph(e) {
-  var form = e.source;
-  var items = form.getItems();
-  for (i = 0; i < items.length; i++) {
-    if (items[i].getType() == FormApp.ItemType.PARAGRAPH_TEXT) {
-      return e.response.getResponseForItem(items[i]).getResponse();
-    }
-  }
-  return null;
-}
