@@ -98,7 +98,6 @@ function onVacUpdateAddOnFormSubmitEvent(e) {
   saveUrlToDrive(url, pref.folder, filename);  
 
   addAds();
-  
 }
 
 function addAds() {
@@ -134,17 +133,17 @@ function convertToDownload(url) {
   //   to
   //   https://drive.google.com/uc?export=download&id=0B5fYc4W5XmgZemFSb3p1M2p0MGc
   // or
-  //   https://cloudbox.ku.ac.th/public.php?service=files&t=7f618ac8474e6a7119ddab1c1e82aa44
+  //   https://cloudbox.ku.ac.th/index.php/s/1RA3zf7aDgVTsBo
   //   to
-  //   https://cloudbox.ku.ac.th/public.php?service=files&t=7f618ac8474e6a7119ddab1c1e82aa44&download
+  //   https://cloudbox.ku.ac.th/index.php/s/1RA3zf7aDgVTsBo/download
 
   if (url.slice(-4) == 'dl=0') {
     // dropbox
     url = url.slice(0, -4) + 'dl=1';
   } else if (url.indexOf('//cloudbox.ku.ac.th') != -1) {
     // cloudbox
-    if (url.slice(-1 * '&download'.length) != '&download') {
-  	  url += '&download';
+    if (url.slice(-1 * '/download'.length) != '/download') {
+  	  url += '/download';
     }
   } else if (url.indexOf('//drive.google') != -1) {
     // G drive
@@ -156,7 +155,6 @@ function convertToDownload(url) {
   }
   return url;
 }
-
 
 
 
