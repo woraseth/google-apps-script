@@ -4,7 +4,7 @@ function test() {
 }
 
 function testPref() {
-  var form = FormApp.getActiveForm(); //FormApp.openById('1Ms51NoqMNrp-cMv0ZpgcViQPSHKBdH21ozf2FShWL1Y');
+  var form = FormApp.getActiveForm(); 
   var resp = form.getResponses();
   for (var i = 0; i < resp.length; i++) {
     var item = resp[i].getResponseForItem(form.getItems()[2]);
@@ -19,7 +19,6 @@ function onOpen(e) {
   SpreadsheetApp.getUi()
       .createAddonMenu()
       .addItem('ตั้งค่า', 'showSidebar')
-      .addItem('เกี่ยวกับแอดออน', 'showAbout')
       .addToUi();
 }
 
@@ -28,20 +27,11 @@ function onInstall(e) {
   onOpen(e);
 }
 
-
 function showSidebar() {
   var ui = HtmlService.createHtmlOutputFromFile('Sidebar')
       .setSandboxMode(HtmlService.SandboxMode.IFRAME)
       .setTitle(ADDON_TITLE);
   SpreadsheetApp.getUi().showSidebar(ui);
-}
-
-function showAbout() {
-  var ui = HtmlService.createHtmlOutputFromFile('About')
-      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-      .setWidth(420)
-      .setHeight(270);
-  FormApp.getUi().showModalDialog(ui, 'ข้อมูลเกี่ยวกับแอดอิน');
 }
 
 function savePref(pref) {
@@ -59,29 +49,31 @@ function adjustFormSubmitTrigger() {
   var pref = PropertiesService.getDocumentProperties().getProperties();
   var triggerNeeded = pref.notify === 'true';
 
-  // Create a new trigger if required; delete existing trigger
+  // find an existing trigger
   var existingTrigger = null;
   for (var i = 0; i < triggers.length; i++) {
-    if (triggers[i].getEventType() == ScriptApp.EventType.CLOCK) {
+    if (triggers[i].getHandlerFunction() == 'onVacEmailAddOnEvent') {
       existingTrigger = triggers[i];
       break;
     }
   }
   
   if (existingTrigger) {
+    // delete the existing one
     ScriptApp.deleteTrigger(existingTrigger);
   }
   
   if (triggerNeeded) {
+    // add a new trigger if needed
     var d = pref.date.split('-');
-    var trigger = ScriptApp.newTrigger('onSomeEvent')
+    var trigger = ScriptApp.newTrigger('onVacEmailAddOnEvent')
         .timeBased()
-        .atDate(parseInt(d[2]), parseInt(d[1]), parseInt(d[0]))
+        .atDate(parseInt(d[2], 10), parseInt(d[1], 10), parseInt(d[0], 10))
         .create();
   }
 }
 
-function onSomeEvent(e) {
+function onVacEmailAddOnEvent(e) {
   var settings = PropertiesService.getDocumentProperties();
   var authInfo = ScriptApp.getAuthorizationInfo(ScriptApp.AuthMode.FULL);
 
@@ -106,8 +98,10 @@ function sendRespondentNotification() {
   var values = SpreadsheetApp.getActiveSheet().getDataRange().getValues();
   
   for (var i = 1; i < values.length; i++) {
-    var email = values[i][emailColumn];
-    MailApp.sendEmail(email, pref.subject, pref.msg);
+    try {
+      var email = values[i][emailColumn];
+      MailApp.sendEmail(email, pref.subject, pref.msg);
+    } catch (ex) {}
   }
   
   MailApp.sendEmail(Session.getActiveUser().getEmail(), 
